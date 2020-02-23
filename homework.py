@@ -1,5 +1,6 @@
 from dataclasses import asdict, dataclass
-from typing import Dict
+from typing import Dict, Type
+
 
 
 @dataclass
@@ -11,11 +12,11 @@ class InfoMessage:
     speed: float
     calories: float
 
-    show_attribute = ('Тип тренировки: {training_type}; '
-                      'Длительность: {duration:.3f} ч.; '
-                      'Дистанция: {distance:.3f} км; '
-                      'Ср. скорость: {speed:.3f} км/ч; '
-                      'Потрачено ккал: {calories:.3f}.'
+    show_attribute = ('Тип тренировки: - {training_type}; '
+                      'Длительность: - {duration:.3f} ч.; '
+                      'Дистанция: - {distance:.3f} км; '
+                      'Ср. скорость: - {speed:.3f} км/ч; '
+                      'Потрачено ккал: - {calories:.3f}.'
                       )
 
     def get_message(self) -> str:
@@ -24,16 +25,16 @@ class InfoMessage:
 
 class Training:
     """Базовый класс тренировки."""
-    M_IN_KM: int = 1000
+    M_IN_KM: float = 1000
     LEN_STEP: float = 0.65
-    H_IN_M: int = 60
+    H_IN_M: float = 60
 
     def __init__(self,
-                 action: int,
+                 action: float,
                  duration: float,
                  weight: float,
                  ) -> None:
-        self.action: int = action
+        self.action: float = action
         self.duration: float = duration
         self.weight: float = weight
 
@@ -61,8 +62,8 @@ class Training:
 
 class Running(Training):
     """Тренировка: бег."""
-    coeff_calorie_1: int = 18
-    coeff_calorie_2: int = 20
+    coeff_calorie_1: float = 18
+    coeff_calorie_2: float = 20
 
     def get_spent_calories(self) -> float:
         """Получить истраченное количество калорий за тренировку."""
@@ -76,7 +77,7 @@ class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
 
     const_1: float = 0.035
-    const_2: int = 2
+    const_2: float = 2
     const_3: float = 0.029
 
     def __init__(self, action, duration, weight, height) -> None:
@@ -96,7 +97,7 @@ class Swimming(Training):
     """Тренировка: плавание."""
     LEN_STEP: float = 1.38
     const_1: float = 1.1
-    const_2: int = 2
+    const_2: float = 2
 
     def __init__(self, action, duration, weight,
                  length_pool, count_pool) -> None:
@@ -117,13 +118,14 @@ class Swimming(Training):
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    choice: Dict[str, __name__] = {
+    choice: Dict[str, Type[Training]] = {
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
     }
-    assert workout_type in choice, "Тип указан неверно"
-    return choice[workout_type](*data)
+    if workout_type in choice:
+        return choice[workout_type](*data)
+    raise ValueError("такой тренировки нет")
 
 
 def main(training: Training) -> None:
