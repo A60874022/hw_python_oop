@@ -35,9 +35,9 @@ class Training:
                  duration: float,
                  weight: float,
                  ) -> None:
-        self.action = action
-        self.duration = duration
-        self.weight = weight
+        self.action: int = action
+        self.duration: float = duration
+        self.weight: float = weight
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -53,11 +53,11 @@ class Training:
 
     def show_training_info(self) -> InfoMessage:
         """Возвращает объект класса сообщения (InfoMessage(заготовка)"""
-        training_type = type(self).__name__
-        duration = self.duration
-        distance = self.get_distance()
-        speed = self.get_mean_speed()
-        calories = self.get_spent_calories()
+        training_type: str = type(self).__name__
+        duration: float = self.duration
+        distance: float = self.get_distance()
+        speed: float = self.get_mean_speed()
+        calories: float = self.get_spent_calories()
         return InfoMessage(training_type, duration, distance, speed, calories)
 
 
@@ -69,9 +69,9 @@ class Running(Training):
 
     def get_spent_calories(self) -> float:
         """Получить истраченное количество калорий за тренировку."""
-        speed = super().get_mean_speed()
-        calories = (self.coeff_calorie_1 * speed
-                    - self.coeff_calorie_2) * self.weight / self.M_IN_KM
+        speed: float = super().get_mean_speed()
+        calories: float = (self.coeff_calorie_1 * speed
+                           - self.coeff_calorie_2) * self.weight / self.M_IN_KM
         return calories * self.duration * self.H_in_M
 
 
@@ -84,14 +84,14 @@ class SportsWalking(Training):
 
     def __init__(self, action, duration, weight, height) -> None:
         super().__init__(action, duration, weight)
-        self.height = height
+        self.height: float = height
 
     def get_spent_calories(self) -> float:
         """Получить количество калорий за тренировку."""
-        speed = super().get_mean_speed()
-        cal = (self.const_1 * self.weight
-               + (speed ** self.const_2 // self.height)
-               * self.const_3 * self.weight)
+        speed: float = super().get_mean_speed()
+        cal: float = (self.const_1 * self.weight
+                      + (speed ** self.const_2 // self.height)
+                      * self.const_3 * self.weight)
         return cal * self.duration * self.H_in_M
 
 
