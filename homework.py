@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from typing import Dict
 
 
 @dataclass
@@ -10,25 +11,22 @@ class InfoMessage:
     speed: float
     calories: float
 
+    show_attribute = ('Тип тренировки: {training_type}; '
+                      'Длительность: {duration:.3f} ч.; '
+                      'Дистанция: {distance:.3f} км; '
+                      'Ср. скорость: {speed:.3f} км/ч; '
+                      'Потрачено ккал: {calories:.3f}.'
+                      )
+
     def get_message(self) -> str:
-        """Возвращает параметры тренировки для распечатывания в консоль"""
-        duration = format(self.duration, ".3f")
-        distance = format(self.distance, ".3f")
-        speed = format(self.speed, ".3f")
-        calories = format(self.calories, ".3f")
-        return (
-            f"Тип тренировки: {self.training_type}; "
-            f"Длительность: {duration} ч.; "
-            f"Дистанция: {distance} км; "
-            f"Ср. скорость: {speed} км/ч; "
-            f"Потрачено ккал: {calories}."
-        )
+        return self.show_attribute.format(**asdict(self))
 
 
 class Training:
     """Базовый класс тренировки."""
     M_IN_KM: int = 1000
     LEN_STEP: float = 0.65
+    H_IN_M: int = 60
 
     def __init__(self,
                  action: int,
@@ -65,19 +63,18 @@ class Running(Training):
     """Тренировка: бег."""
     coeff_calorie_1: int = 18
     coeff_calorie_2: int = 20
-    H_in_M: int = 60
 
     def get_spent_calories(self) -> float:
         """Получить истраченное количество калорий за тренировку."""
         speed: float = super().get_mean_speed()
         calories: float = (self.coeff_calorie_1 * speed
                            - self.coeff_calorie_2) * self.weight / self.M_IN_KM
-        return calories * self.duration * self.H_in_M
+        return calories * self.duration * self.H_IN_M
 
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
-    H_in_M: int = 60
+
     const_1: float = 0.035
     const_2: int = 2
     const_3: float = 0.029
@@ -92,7 +89,7 @@ class SportsWalking(Training):
         cal: float = (self.const_1 * self.weight
                       + (speed ** self.const_2 // self.height)
                       * self.const_3 * self.weight)
-        return cal * self.duration * self.H_in_M
+        return cal * self.duration * self.H_IN_M
 
 
 class Swimming(Training):
@@ -120,11 +117,12 @@ class Swimming(Training):
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    choice = {
+    choice: Dict[str, __name__] = {
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
     }
+    assert workout_type in choice, "Тип указан неверно"
     return choice[workout_type](*data)
 
 
